@@ -3,9 +3,15 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Добавляем недостающий ключ
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
 RUN apt-get update && \
-    apt-get install -y wget gnupg2 && \
-    wget -qO - https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C | gpg --dearmor -o /etc/apt/trusted.gpg.d/ubuntu.gpg
+    apt-get install -y wget gpg && \
+    wget -qO - https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C | \
+    gpg --dearmor -o /etc/apt/trusted.gpg.d/ubuntu.gpg
+
 
 
 # Обновление и установка пакетов
