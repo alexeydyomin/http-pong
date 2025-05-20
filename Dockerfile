@@ -3,32 +3,36 @@ FROM ubuntu:22.04
 # Отключаем интерактивный режим для apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Обновляем ключи, добавляем curl и gnupg, обновляем apt
-RUN apt-get update && \
+# Сначала устанавливаем необходимые пакеты без обновления
+RUN apt-get update || true && \
     apt-get install -y --no-install-recommends \
+    ca-certificates \
     curl \
     gnupg \
-    gpg \
-    ca-certificates \
-    apt-transport-https && \
+    gpg && \
     rm -rf /var/lib/apt/lists/*
 
-# Явно добавляем ключ для Ubuntu репозиториев
-RUN curl -fsSL https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C | gpg --dearmor > /usr/share/keyrings/ubuntu-archive-keyring.gpg && \
-    apt-get update
+# Добавляем ключи Ubuntu
+RUN mkdir -p /etc/apt/keyrings && \
+    curl -fsSL https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C | gpg --dearmor -o /etc/apt/keyrings/ubuntu-archive-keyring.gpg && \
+    echo "deb [signed-by=/etc/apt/keyrings/ubuntu-archive-keyring.gpg] http://archive.ubuntu.com/ubuntu jammy main restricted universe multiverse" > /etc/apt/sources.list && \
+    echo "deb [signed-by=/etc/apt/keyrings/ubuntu-archive-keyring.gpg] http://archive.ubuntu.com/ubuntu jammy-updates main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb [signed-by=/etc/apt/keyrings/ubuntu-archive-keyring.gpg] http://archive.ubuntu.com/ubuntu jammy-backports main restricted universe multiverse" >> /etc/apt/sources.list && \
+    echo "deb [signed-by=/etc/apt/keyrings/ubuntu-archive-keyring.gpg] http://security.ubuntu.com/ubuntu jammy-security main restricted universe multiverse" >> /etc/apt/sources.list
 
-# Устанавливаем необходимые пакеты
-RUN apt-get install -y --no-install-recommends \
+# Теперь можно обновлять и устанавливать пакеты
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     build-essential \
     python3 \
     python3-venv \
     python3-pip && \
     rm -rf /var/lib/apt/lists/*
 
-# создаем виртуальное окружение
+# Создаем виртуальное окружение
 RUN python3 -m venv /opt/venv
 
-# активируем его для всех следующих RUN и CMD
+# Активируем его для всех следующих RUN и CMD
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Устанавливаем honcho и зависимости внутри виртуального окружения
