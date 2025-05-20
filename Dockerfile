@@ -1,4 +1,4 @@
-FROM ubuntu:22.04
+FROM ubuntu:latest
 
 # Отключаем интерактивный режим для apt
 ENV DEBIAN_FRONTEND=noninteractive
