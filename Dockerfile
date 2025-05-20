@@ -2,12 +2,21 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y --allow-unauthenticated \
+# Добавляем недостающий ключ
+RUN apt-get update && \
+    apt-get install -y wget gnupg && \
+    wget -qO - https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C | gpg --dearmor -o /etc/apt/trusted.gpg.d/ubuntu.gpg
+
+# Обновление и установка пакетов
+RUN apt-get update && \
+    apt-get install -y \
     python3-pip \
     python3-venv \
     python3-dev \
-    build-essential \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
 
 # создаем виртуальное окружение
 RUN python3 -m venv /opt/venv
