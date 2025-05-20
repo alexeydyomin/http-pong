@@ -2,14 +2,11 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && \
-    apt-get install -y curl gnupg && \
-    curl -fsSL https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C | \
-    gpg2 --dearmor -o /etc/apt/trusted.gpg.d/ubuntu.gpg && \
+RUN apt-get update && apt-get install -y curl gnupg && \
+    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C" | gpg --dearmor > /etc/apt/trusted.gpg.d/ubuntu.gpg && \
     apt-get update
 
-
-
+RUN apt-get update && apt-get install -y curl gnupg && dpkg -l | grep gnupg && which gpg && gpg --version
 
 
 # Обновление и установка пакетов
