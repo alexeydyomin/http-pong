@@ -1,23 +1,21 @@
 FROM ubuntu:22.04
 
+# Отключаем интерактивный режим для apt
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get update && apt-get install -y curl gnupg && \
-    curl -fsSL "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C" | gpg --dearmor > /etc/apt/trusted.gpg.d/ubuntu.gpg && \
+# Обновляем ключи, добавляем curl и gnupg, обновляем apt
+RUN apt-get update && apt-get install -y curl gnupg ca-certificates apt-transport-https && \
+    # Явно добавляем ключ для Ubuntu репозиториев (тот, что указан в логе)
+    curl -fsSL https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C | gpg --dearmor > /usr/share/keyrings/ubuntu-archive-keyring.gpg && \
+    # Переподключаем источники, используя новый ключ (если надо, но для ubuntu:22.04 стандартный ключ уже есть) \
     apt-get update
 
-RUN apt-get update && apt-get install -y curl gnupg && dpkg -l | grep gnupg && which gpg && gpg --version
+# Продолжайте дальше с нужными установками
+# Например:
+RUN apt-get install -y build-essential
 
-
-# Обновление и установка пакетов
-RUN apt-get update && \
-    apt-get install -y \
-    python3-pip \
-    python3-venv \
-    python3-dev \
-    build-essential && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+# Очистка кеша apt для уменьшения размера образа
+RUN rm -rf /var/lib/apt/lists/*
 
 
 # создаем виртуальное окружение
